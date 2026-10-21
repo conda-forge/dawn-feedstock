@@ -1,5 +1,5 @@
 context:
-  version: "20261016.190333"
+  version: "20261019.211215"
   # The OpenGL-Registry revision pinned by third_party/OpenGL-Registry/src in
   # Dawn's DEPS. build.sh fails if it no longer matches; update it together
   # with the sha256 of gl.xml below.
@@ -11,10 +11,12 @@ package:
 
 source:
   - url: https://github.com/google/dawn/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 7276879eb9b8e510d960f25d203e4f69e62d0b2d63992a2f941b9d1b27518f59
+    sha256: 0706451e1822bedb2966ae3150a4ca1e15a79f3c984b6f14fba49d4118d87bb5
     patches:
       - 0001-Link-imported-dependencies-into-the-monolithic-library.patch
       - 0002-Allow-overriding-the-path-to-khrplatform.h.patch
+      # dawn_version.h is generated too late and not installed
+      - 0003-Generate-and-install-dawn_version.h-before-use.patch
   - if: linux
     then:
       # The Khronos gl.xml that Dawn's OpenGL loader is generated from, put
@@ -52,8 +54,6 @@ requirements:
         # run_exports, pins it to x.x because the internal spvtools::opt C++ API
         # is not ABI stable.
         - spirv-tools-internal
-    - if: not osx
-      then:
         - libvulkan-headers
         - vulkan-utility-libraries
     - if: linux
@@ -84,6 +84,7 @@ tests:
       include:
         - webgpu/webgpu.h
         - dawn/webgpu_cpp.h
+        - dawn/dawn_version.h
       files:
         - ${{ "Library/" if win }}lib/cmake/Dawn/DawnConfig.cmake
   - files:

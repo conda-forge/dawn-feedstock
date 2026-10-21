@@ -1,0 +1,44 @@
+Generate and install dawn/dawn_version.h before it is used
+
+Upstream commit
+https://github.com/google/dawn/commit/c9407b957f8b59a961e4d1e69085e59b28545837
+("[version] Add stable major and minor versions to dawn headers") made webgpu.h
+include the generated dawn/dawn_version.h and gave dawn_headers a link
+dependency on dawn::dawn_version, but in the CMake build:
+
+- dawncpp_module only add_dependencies() on webgpu_cpp and webgpu_c, so the
+  C++20 module dependency scan of webgpu.ixx can run before dawn_version.h is
+  generated ("dawn/dawn_version.h: No such file or directory").
+- The monolithic webgpu_dawn install only collects public headers from
+  dawn_headers, dawncpp_headers and dawn_native_objects, so the installed
+  webgpu.h includes a header that is not installed.
+
+Not upstream yet.
+
+diff --git a/src/dawn/CMakeLists.txt b/src/dawn/CMakeLists.txt
+index e8393357f..f181e4bad 100644
+--- a/src/dawn/CMakeLists.txt
++++ b/src/dawn/CMakeLists.txt
+@@ -137,7 +137,7 @@ if(DAWN_SUPPORTS_CXX_MODULES)
+     "$<BUILD_INTERFACE:${DAWN_INCLUDE_DIR}>"
+     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+   )
+-  add_dependencies(dawncpp_module webgpu_cpp webgpu_c)
++  add_dependencies(dawncpp_module webgpu_cpp webgpu_c dawn_version)
+   get_target_property(webgpu_cpp_ALIASED webgpu_cpp ALIASED_TARGET)
+   target_link_libraries(${webgpu_cpp_ALIASED} INTERFACE dawncpp_module)
+ 
+diff --git a/src/dawn/native/CMakeLists.txt b/src/dawn/native/CMakeLists.txt
+index e047bd73f..38ad2a111 100644
+--- a/src/dawn/native/CMakeLists.txt
++++ b/src/dawn/native/CMakeLists.txt
+@@ -1085,6 +1085,9 @@ if (DAWN_BUILD_MONOLITHIC_LIBRARY)
+         get_target_property(headers "${dawn_target_name}" INTERFACE_SOURCES)
+         list(INSERT webgpu_dawn_public_headers 0 "${headers}")
+     endforeach()
++    # webgpu.h includes dawn/dawn_version.h. Only install that header from
++    # dawn_version; its other output, Version_autogen.h, is internal.
++    list(APPEND webgpu_dawn_public_headers "${DAWN_BUILD_GEN_DIR}/include/dawn/dawn_version.h")
+     if (DAWN_ENABLE_INSTALL)
+         dawn_install_target(dawn_public_config)
+         dawn_install_target(webgpu_dawn
