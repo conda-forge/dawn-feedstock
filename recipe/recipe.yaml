@@ -27,7 +27,7 @@ source:
         target_directory: third_party/OpenGL-Registry/src/xml
 
 build:
-  number: 0
+  number: 1
   script:
     file: build
     env:
@@ -71,6 +71,12 @@ requirements:
         then:
           - libegl-devel
           - xorg-libx11
+  run_exports:
+    # Dawn makes no ABI promises: libwebgpu_dawn's SONAME is unversioned, the
+    # Dawn-specific parts of webgpu.h and the C++ API (dawn::native) change
+    # between releases, and releases are cut almost daily. Pin dependents to
+    # the exact release they were built against (x.x of YYYYMMDD.HHMMSS).
+    - ${{ pin_subpackage('dawn', upper_bound='x.x') }}
   run:
     # Dawn loads the Vulkan loader at runtime
     - if: linux
