@@ -1,5 +1,5 @@
 context:
-  version: "20261022.205350"
+  version: "20261023.194543"
   # The OpenGL-Registry revision pinned by third_party/OpenGL-Registry/src in
   # Dawn's DEPS. build.sh fails if it no longer matches; update it together
   # with the sha256 of gl.xml below.
@@ -11,7 +11,7 @@ package:
 
 source:
   - url: https://github.com/google/dawn/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 2863ec563e3cecddde9fa68e50e28e14d5c7dcace6891219f1822e0711ad018f
+    sha256: aca6f9ae389b0b6e25dcf0e14bacdfa92c724d41815052270ee29f4429cf939d
     patches:
       - 0001-Link-imported-dependencies-into-the-monolithic-library.patch
       - 0002-Allow-overriding-the-path-to-khrplatform.h.patch
