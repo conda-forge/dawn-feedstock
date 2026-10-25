@@ -27,7 +27,7 @@ source:
         target_directory: third_party/OpenGL-Registry/src/xml
 
 build:
-  number: 2
+  number: 3
   script:
     file: build
     env:
