@@ -7,19 +7,20 @@ find_package(SPIRV-Headers CONFIG REQUIRED)
 # Dawn refers to the headers by their in-tree target name.
 add_library(SPIRV-Headers ALIAS SPIRV-Headers::SPIRV-Headers)
 
+# SPIRV-Tools is needed for Tint's SPIR-V reader, which build.sh enables on
+# every platform (Dawn only enables it with the Vulkan backend by default).
+find_package(SPIRV-Tools CONFIG REQUIRED)
+find_package(SPIRV-Tools-opt CONFIG REQUIRED)
+
+# Tint's SPIR-V reader includes SPIRV-Tools private headers ("source/opt/...").
+find_path(SPIRV_TOOLS_PRIVATE_INCLUDE_DIR source/opt/build_module.h
+  PATH_SUFFIXES spirv-tools-private REQUIRED)
+set_property(TARGET SPIRV-Tools-opt APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES "${SPIRV_TOOLS_PRIVATE_INCLUDE_DIR}")
+
 # DAWN_ENABLE_VULKAN is not defined yet at this point; Vulkan is enabled
-# by default everywhere except Apple platforms. SPIRV-Tools is only needed for
-# Tint's SPIR-V support, which is built together with the Vulkan backend.
+# by default everywhere except Apple platforms.
 if(NOT APPLE)
-  find_package(SPIRV-Tools CONFIG REQUIRED)
-  find_package(SPIRV-Tools-opt CONFIG REQUIRED)
-
-  # Tint's SPIR-V reader includes SPIRV-Tools private headers ("source/opt/...").
-  find_path(SPIRV_TOOLS_PRIVATE_INCLUDE_DIR source/opt/build_module.h
-    PATH_SUFFIXES spirv-tools-private REQUIRED)
-  set_property(TARGET SPIRV-Tools-opt APPEND PROPERTY
-    INTERFACE_INCLUDE_DIRECTORIES "${SPIRV_TOOLS_PRIVATE_INCLUDE_DIR}")
-
   find_package(VulkanHeaders CONFIG REQUIRED)
   find_package(VulkanUtilityLibraries CONFIG REQUIRED)
 endif()

@@ -20,6 +20,16 @@ if [[ "${target_platform}" == linux-* ]]; then
     )
 fi
 
+if [[ "${target_platform}" == osx-* ]]; then
+    # Dawn builds Tint's SPIR-V reader only together with the Vulkan backend,
+    # which is off on macOS; without it, SPIR-V shader modules are rejected
+    # with "SPIR-V is disallowed." even though Metal can run them after Tint
+    # translates them.
+    EXTRA_CMAKE_ARGS+=(
+        -DTINT_BUILD_SPV_READER=ON
+    )
+fi
+
 cmake -S . -B build -G Ninja \
     ${CMAKE_ARGS} \
     ${EXTRA_CMAKE_ARGS[@]+"${EXTRA_CMAKE_ARGS[@]}"} \
