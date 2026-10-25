@@ -27,7 +27,7 @@ source:
         target_directory: third_party/OpenGL-Registry/src/xml
 
 build:
-  number: 1
+  number: 2
   script:
     file: build
     env:
@@ -46,14 +46,15 @@ requirements:
   host:
     - libabseil
     - spirv-headers
+    # Tint's SPIR-V reader uses the private headers in include/spirv-tools-private.
+    # It is built everywhere, also on macOS (see build.sh), so that SPIR-V
+    # shader modules work with every backend.
+    # spirv-tools-internal pulls in the matching spirv-tools and, through its
+    # run_exports, pins it to x.x because the internal spvtools::opt C++ API
+    # is not ABI stable.
+    - spirv-tools-internal
     - if: not osx
       then:
-        # Tint's SPIR-V reader uses the private headers in include/spirv-tools-private.
-        # SPIR-V support is only built with the Vulkan backend, not on macOS.
-        # spirv-tools-internal pulls in the matching spirv-tools and, through its
-        # run_exports, pins it to x.x because the internal spvtools::opt C++ API
-        # is not ABI stable.
-        - spirv-tools-internal
         - libvulkan-headers
         - vulkan-utility-libraries
     - if: linux
