@@ -11,3 +11,5 @@ provider:
   osx_arm64: default
 bot:
   automerge: true
+  version_updates:
+    random_fraction_to_keep: 0.05
